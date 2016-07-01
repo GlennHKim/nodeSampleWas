@@ -93,7 +93,7 @@ router.route('/contact')
 		contact.save(function(err){
 			if(err)
 				res.send(err);
-			res.send({ message : "success to save contact"});
+			res.json({ message : "success to save contact"});
 		})
 
 	});
@@ -105,7 +105,7 @@ router.route('/contact/:id')
 			function(err, contact){
 			if(err)
 				res.send(err);
-			res.send(contact);
+			res.json(contact);
 		});
 	})
 	.put(function(req, res){
@@ -123,7 +123,7 @@ router.route('/contact/:id')
 				contact.save(function(err){
 					if(err)
 						res.send(err)
-					res.send({message:"update success"});
+					res.json({message:"update success"});
 				});
 			});
 	})
@@ -132,10 +132,37 @@ router.route('/contact/:id')
 		Contact.remove({id : req.params.id}, function(err){
 			if(err)
 				res.send(err);
-			res.send({message : "contact removed"});
+			res.json({message : "contact removed"});
 		});
 	});
 
+
+router.route('/dialog/:sender/:receiver')
+	.get(function(req, res){
+		console.log("dialog request sender: " + req.params.sender + " / receiver : " + req.params.receiver );
+		Dialog.find({$and :[{tag:new RegExp(req.params.sender)}, {tag:new RegExp(req.params.receiver)}]}, function(err, dialogs){
+			if(err)
+				res.send(err);
+			res.json(dialogs);
+		});
+	});
+router.route('/dialog/:id')	
+	.post(function(req, res){
+		console.log("dialog put");
+		var dialog = new Dialog();
+
+		dialog.sender = req.body.sender;
+		dialog.receiver = req.body.receiver;
+		dialog.text = req.body.text;
+		dialog.time = req.body.time;
+		dialog.tag = "#" + req.body.sender + "#" + req.body.receiver;
+
+		dialog.save(function(err){
+			if(err)
+				res.send(err);
+			res.json({message : "success"});
+		});
+	});
 
 app.use('/api', router);	// 모든 route는 /api가 어미로 붙는다.
 
@@ -152,4 +179,4 @@ mongoose.connect('mongodb://localhost/my_database');
 
 var Bear = require('./app/models/bear');
 var Contact = require('./app/models/contact');
-
+var Dialog = require('./app/models/dialog');
